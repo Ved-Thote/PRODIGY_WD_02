@@ -27,19 +27,15 @@ A sleek and functional Stopwatch application built using HTML, CSS, and JavaScri
 
 ```
 git clone https://github.com/Ved-Thote/PRODIGY_WD_02.git
-
 ```
 2. Navigate to the project folder:
 
 ```
 cd stopwatch-app
-
 ```
 3. Open index.html in your browser:
-
-
+   
 ```
-
 index.html # For Windows
 index.html # For macOS
 ```
