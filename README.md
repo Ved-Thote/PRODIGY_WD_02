@@ -31,13 +31,13 @@ git clone https://github.com/Ved-Thote/PRODIGY_WD_02.git
 2. Navigate to the project folder:
 
 ```
-cd stopwatch-app
+cd PRODIGY_WD_02
 ```
-3. Open index.html in your browser:
+3. Open HTML file in your browser:
    
 ```
-index.html # For Windows
-index.html # For macOS
+stopWatch.html # For Windows
+stopWatch.html # For macOS
 ```
 
 4. "Start" to begin the stopwatch.
