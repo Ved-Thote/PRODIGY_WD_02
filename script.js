@@ -1,232 +1,133 @@
-  class TicTacToe {
-            constructor() {
-                this.board = Array(9).fill('');
-                this.currentPlayer = 'X';
-                this.gameMode = 'ai';
-                this.gameActive = true;
-                this.scores = { X: 0, O: 0, draw: 0 };
-                this.gameStarted = false;
-                
-                this.winningCombinations = [
-                    [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
-                    [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
-                    [0, 4, 8], [2, 4, 6] // diagonals
-                ];
+class Stopwatch {
+  constructor() {
+    this.time = 0;
+    this.interval = null;
+    this.running = false;
+    this.lapCounter = 0;
+    this.laps = [];
+    this.isPaused = false;
 
-                this.initializeGame();
-            }
+    this.display = document.getElementById("display");
+    this.startBtn = document.getElementById("startBtn");
+    this.pauseBtn = document.getElementById("pauseBtn");
+    this.resetBtn = document.getElementById("resetBtn");
+    this.lapBtn = document.getElementById("lapBtn");
+    this.lapTimes = document.getElementById("lapTimes");
 
-            initializeGame() {
-                this.bindEvents();
-                this.updateDisplay();
-            }
+    this.bindEvents();
+  }
 
-            bindEvents() {
-                // Start button
-                document.getElementById('startBtn').addEventListener('click', () => {
-                    this.startGame();
-                });
+  bindEvents() {
+    this.startBtn.addEventListener("click", () => this.start());
+    this.pauseBtn.addEventListener("click", () => this.pause());
+    this.resetBtn.addEventListener("click", () => this.reset());
+    this.lapBtn.addEventListener("click", () => this.lap());
+  }
 
-                // Back button
-                document.getElementById('backBtn').addEventListener('click', () => {
-                    this.backToMenu();
-                });
+  start() {
+    if (!this.running) {
+      this.running = true;
+      this.isPaused = false;
+      this.display.classList.add("running");
+      this.interval = setInterval(() => {
+        this.time += 10;
+        this.updateDisplay();
+      }, 10);
 
-                // Game board clicks
-                document.getElementById('gameBoard').addEventListener('click', (e) => {
-                    if (e.target.classList.contains('cell')) {
-                        this.handleCellClick(e.target);
-                    }
-                });
+      this.startBtn.disabled = true;
+      this.pauseBtn.disabled = false;
+      this.lapBtn.disabled = false;
+      this.resetBtn.disabled = true;
+    }
+  }
 
-                // Reset button
-                document.getElementById('resetBtn').addEventListener('click', () => {
-                    this.resetGame();
-                });
+  pause() {
+    if (this.running) {
+      this.running = false;
+      this.isPaused = true;
+      this.display.classList.remove("running");
+      clearInterval(this.interval);
 
-                // Mode selection buttons
-                document.querySelectorAll('.mode-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        this.switchMode(e.target.dataset.mode);
-                    });
-                });
-            }
+      this.startBtn.disabled = false;
+      this.startBtn.textContent = "Resume";
+      this.pauseBtn.disabled = true;
+      this.lapBtn.disabled = true;
+      this.resetBtn.disabled = false;
+    }
+  }
 
-            startGame() {
-                this.gameStarted = true;
-                document.getElementById('startScreen').classList.add('hidden');
-                document.getElementById('gameContent').classList.add('visible');
-                this.resetGame();
-            }
+  reset() {
+    this.running = false;
+    this.isPaused = false;
+    this.display.classList.remove("running");
+    clearInterval(this.interval);
+    this.time = 0;
+    this.lapCounter = 0;
+    this.laps = [];
 
-            backToMenu() {
-                this.gameStarted = false;
-                document.getElementById('startScreen').classList.remove('hidden');
-                document.getElementById('gameContent').classList.remove('visible');
-                // Reset scores when going back to menu
-                this.scores = { X: 0, O: 0, draw: 0 };
-                this.updateScoreboard();
-            }
+    this.updateDisplay();
+    this.updateLapDisplay();
 
-            switchMode(mode) {
-                this.gameMode = mode;
-                document.querySelectorAll('.mode-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
-                
-                if (this.gameStarted) {
-                    this.resetGame();
-                }
-            }
+    this.startBtn.disabled = false;
+    this.startBtn.textContent = "Start";
+    this.pauseBtn.disabled = true;
+    this.lapBtn.disabled = true;
+    this.resetBtn.disabled = false;
+  }
 
-            handleCellClick(cell) {
-                const index = parseInt(cell.dataset.index);
-                
-                if (this.board[index] !== '' || !this.gameActive) return;
+  lap() {
+    if (this.running) {
+      this.lapCounter++;
+      const lapTime = this.time;
+      this.laps.unshift({
+        number: this.lapCounter,
+        time: lapTime,
+        formattedTime: this.formatTime(lapTime),
+      });
+      this.updateLapDisplay();
+    }
+  }
 
-                this.makeMove(index, this.currentPlayer);
-                
-                if (this.gameActive && this.gameMode === 'ai' && this.currentPlayer === 'O') {
-                    this.showThinking();
-                    setTimeout(() => this.makeAIMove(), 800);
-                }
-            }
+  formatTime(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    const centiseconds = Math.floor((ms % 1000) / 10);
 
-            makeMove(index, player) {
-                this.board[index] = player;
-                const cell = document.querySelector(`[data-index="${index}"]`);
-                cell.textContent = player;
-                cell.classList.add(player.toLowerCase());
-                
-                if (this.checkWinner()) {
-                    this.handleGameEnd(player);
-                } else if (this.board.every(cell => cell !== '')) {
-                    this.handleGameEnd('draw');
-                } else {
-                    this.currentPlayer = this.currentPlayer === 'X' ? 'O' : 'X';
-                    this.updateDisplay();
-                }
-            }
+    return `${minutes.toString().padStart(2, "0")}:${seconds
+      .toString()
+      .padStart(2, "0")}:${centiseconds.toString().padStart(2, "0")}`;
+  }
 
-            makeAIMove() {
-                if (!this.gameActive) return;
-                
-                const bestMove = this.getBestMove();
-                this.makeMove(bestMove, 'O');
-            }
+  updateDisplay() {
+    this.display.textContent = this.formatTime(this.time);
+  }
 
-            getBestMove() {
-                // Check if AI can win
-                for (let i = 0; i < 9; i++) {
-                    if (this.board[i] === '') {
-                        this.board[i] = 'O';
-                        if (this.checkWinnerForBoard(this.board)) {
-                            this.board[i] = '';
-                            return i;
-                        }
-                        this.board[i] = '';
-                    }
-                }
+  updateLapDisplay() {
+    if (this.laps.length === 0) {
+      this.lapTimes.innerHTML = "";
+      return;
+    }
 
-                // Check if AI needs to block player
-                for (let i = 0; i < 9; i++) {
-                    if (this.board[i] === '') {
-                        this.board[i] = 'X';
-                        if (this.checkWinnerForBoard(this.board)) {
-                            this.board[i] = '';
-                            return i;
-                        }
-                        this.board[i] = '';
-                    }
-                }
+    const lapHTML = this.laps
+      .map(
+        (lap) => `
+                    <div class="lap-item">
+                        <span class="lap-number">Lap ${lap.number}</span>
+                        <span class="lap-time">${lap.formattedTime}</span>
+                    </div>
+                `
+      )
+      .join("");
 
-                // Take center if available
-                if (this.board[4] === '') return 4;
+    this.lapTimes.innerHTML = `
+                    <h3>Lap Times</h3>
+                    ${lapHTML}
+                `;
+  }
+}
 
-                // Take corners
-                const corners = [0, 2, 6, 8];
-                const availableCorners = corners.filter(i => this.board[i] === '');
-                if (availableCorners.length > 0) {
-                    return availableCorners[Math.floor(Math.random() * availableCorners.length)];
-                }
-
-                // Take any available space
-                const available = this.board.map((cell, index) => cell === '' ? index : null).filter(i => i !== null);
-                return available[Math.floor(Math.random() * available.length)];
-            }
-
-            checkWinner() {
-                return this.checkWinnerForBoard(this.board);
-            }
-
-            checkWinnerForBoard(board) {
-                return this.winningCombinations.some(combination => {
-                    const [a, b, c] = combination;
-                    return board[a] && board[a] === board[b] && board[a] === board[c];
-                });
-            }
-
-            handleGameEnd(result) {
-                this.gameActive = false;
-                
-                if (result === 'draw') {
-                    this.scores.draw++;
-                    document.getElementById('gameInfo').textContent = "It's a draw! 🤝";
-                } else {
-                    this.scores[result]++;
-                    const winner = result === 'X' ? 'Player X' : (this.gameMode === 'ai' ? 'AI' : 'Player O');
-                    document.getElementById('gameInfo').textContent = `${winner} wins! 🎉`;
-                    this.highlightWinningCells();
-                }
-                
-                this.updateScoreboard();
-            }
-
-            highlightWinningCells() {
-                this.winningCombinations.forEach(combination => {
-                    const [a, b, c] = combination;
-                    if (this.board[a] && this.board[a] === this.board[b] && this.board[a] === this.board[c]) {
-                        [a, b, c].forEach(index => {
-                            document.querySelector(`[data-index="${index}"]`).classList.add('winner');
-                        });
-                    }
-                });
-            }
-
-            showThinking() {
-                document.getElementById('gameInfo').innerHTML = '<span class="thinking">AI is thinking... 🤔</span>';
-            }
-
-            updateDisplay() {
-                if (this.gameActive) {
-                    const currentPlayerName = this.currentPlayer === 'X' ? 'Your' : 
-                        (this.gameMode === 'ai' ? 'AI\'s' : 'Player O\'s');
-                    document.getElementById('gameInfo').textContent = `${currentPlayerName} turn`;
-                }
-            }
-
-            updateScoreboard() {
-                document.getElementById('scoreX').textContent = this.scores.X;
-                document.getElementById('scoreO').textContent = this.scores.O;
-                document.getElementById('scoreDraw').textContent = this.scores.draw;
-            }
-
-            resetGame() {
-                this.board = Array(9).fill('');
-                this.currentPlayer = 'X';
-                this.gameActive = true;
-                
-                document.querySelectorAll('.cell').forEach(cell => {
-                    cell.textContent = '';
-                    cell.classList.remove('x', 'o', 'winner');
-                });
-                
-                this.updateDisplay();
-            }
-        }
-
-        // Initialize the game when the page loads
-        window.addEventListener('DOMContentLoaded', () => {
-            new TicTacToe();
-        });
+// Initialize the stopwatch when the page loads
+document.addEventListener("DOMContentLoaded", () => {
+  new Stopwatch();
+});
