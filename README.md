@@ -25,21 +25,23 @@ A sleek and functional Stopwatch application built using HTML, CSS, and JavaScri
 
 1. Clone the repository:
 
-```bash
-git clone https://github.com/yourusername/stopwatch-app.git
-Navigate to the project folder:
+```
+git clone https://github.com/Ved-Thote/PRODIGY_WD_02.git
 
-bash
-Copy
-Edit
+```
+2. Navigate to the project folder:
+
+```
 cd stopwatch-app
-Open index.html in your browser:
 
-bash
-Copy
-Edit
+```
+3. Open index.html in your browser:
+
+
 ```
 
 index.html # For Windows
 index.html # For macOS
-"Start" to begin the stopwatch.
+```
+
+4. "Start" to begin the stopwatch.
